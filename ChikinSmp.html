@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ChikinSMP</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#07070f;
+  --bg2:#0d0d1a;
+  --card:#111120;
+  --card2:#16162a;
+  --border:#1f1f3a;
+  --border2:#2a2a4a;
+  --cyan:#00e5ff;
+  --cyan2:#00b8d4;
+  --cyan-glow:rgba(0,229,255,0.15);
+  --text:#dde0f0;
+  --muted:#5a5a8a;
+  --muted2:#3a3a6a;
+  --gold:#ffd700;
+  --green:#00e676;
+  --red:#ff1744;
+  --purple:#7c4dff;
+}
+body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(0,229,255,0.04) 0%,transparent 70%);pointer-events:none;z-index:0;}
+
+/* STARS */
+#stars{position:fixed;inset:0;pointer-events:none;z-index:0;}
+.star{position:absolute;border-radius:50%;background:#fff;animation:twinkle var(--d) var(--delay) infinite;}
+@keyframes twinkle{0%,100%{opacity:0;}50%{opacity:var(--op);}}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+
+/* LAYOUT */
+#app{display:flex;flex-direction:column;min-height:100vh;position:relative;z-index:1;}
+.layout{display:flex;flex:1;}
+
+/* NAVBAR */
+nav{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;height:58px;
+  background:rgba(7,7,15,0.95);
+  border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:100;
+  backdrop-filter:blur(20px);
+}
+.nav-logo{display:flex;align-items:center;gap:10px;cursor:pointer;text-decoration:none;}
+.logo-box{
+  width:34px;height:34px;border-radius:9px;
+  background:linear-gradient(135deg,var(--cyan),var(--purple));
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;flex-shrink:0;
+}
+.nav-logo-text{font-size:17px;font-weight:800;color:#fff;letter-spacing:-.3px;}
+.nav-right{display:flex;align-items:center;gap:10px;}
+.nav-bal{
+  background:var(--card2);border:1px solid var(--border2);
+  padding:6px 14px;border-radius:8px;font-size:12px;
+  color:var(--cyan);font-weight:700;font-family:'JetBrains Mono',monospace;
+  display:none;
+}
+.user-chip{
+  display:none;align-items:center;gap:7px;
+  background:var(--card2);border:1px solid var(--border2);
+  padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600;
+}
+.user-chip .ava{font-size:15px;}
+.btn-nav-login{
+  background:var(--cyan);color:#000;border:none;
+  padding:7px 18px;border-radius:8px;font-weight:800;
+  font-size:12px;cursor:pointer;transition:all .2s;letter-spacing:.3px;
+}
+.btn-nav-login:hover{background:var(--cyan2);transform:translateY(-1px);}
+.btn-nav-logout{
+  background:transparent;color:var(--muted);border:1px solid var(--border);
+  padding:7px 14px;border-radius:8px;font-weight:600;
+  font-size:12px;cursor:pointer;transition:all .2s;display:none;
+}
+.btn-nav-logout:hover{color:var(--red);border-color:var(--red);}
+
+/* SIDEBAR */
+aside{
+  width:210px;min-height:calc(100vh - 58px);
+  background:var(--bg2);
+  border-right:1px solid var(--border);
+  padding:18px 0;
+  display:flex;flex-direction:column;justify-content:space-between;
+  position:sticky;top:58px;height:calc(100vh - 58px);
+  flex-shrink:0;
+}
+.s-section{margin-bottom:20px;}
+.s-label{
+  font-size:9px;font-weight:700;letter-spacing:2px;
+  color:var(--muted2);padding:0 16px 8px;text-transform:uppercase;
+}
+.s-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 16px;cursor:pointer;
+  transition:all .15s;
+  font-size:13px;font-weight:600;color:var(--muted);
+  position:relative;user-select:none;
+}
+.s-item:hover{background:var(--card);color:var(--text);}
+.s-item.active{background:var(--card);color:var(--cyan);}
+.s-item.active::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;
+  width:2px;background:var(--cyan);border-radius:0 2px 2px 0;
+}
+.s-item .ico{font-size:15px;width:20px;text-align:center;}
+.s-soon{
+  font-size:8px;font-weight:700;letter-spacing:1px;
+  color:var(--muted2);margin-left:auto;
+  background:var(--border);padding:2px 6px;border-radius:4px;
+}
+.s-bottom{padding:12px;}
+.s-login-btn{
+  display:block;width:100%;
+  background:linear-gradient(135deg,var(--cyan),var(--purple));
+  color:#000;border:none;padding:10px;border-radius:9px;
+  font-weight:800;font-size:12px;cursor:pointer;
+  text-align:center;transition:all .2s;letter-spacing:.3px;
+}
+.s-login-btn:hover{opacity:.9;transform:translateY(-1px);}
+
+/* MAIN */
+main{flex:1;overflow-y:auto;}
+.page{display:none;padding:32px;}
+.page.active{display:block;animation:fadeIn .2s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+/* PAGE TITLES */
+.pg-title{font-size:22px;font-weight:800;color:#fff;margin-bottom:3px;letter-spacing:-.3px;}
+.pg-sub{color:var(--muted);font-size:13px;margin-bottom:26px;}
+
+/* ── HOME ── */
+.hero{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:18px;padding:56px 40px;text-align:center;
+  margin-bottom:32px;position:relative;overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at center top,rgba(0,229,255,.07) 0%,transparent 65%);
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.25);
+  color:var(--cyan);padding:4px 14px;border-radius:20px;
+  font-size:11px;font-weight:700;letter-spacing:.5px;
+  margin-bottom:18px;position:relative;
+}
+.hero h1{
+  font-size:52px;font-weight:800;color:#fff;
+  margin-bottom:10px;position:relative;letter-spacing:-1.5px;
+  line-height:1.1;
+}
+.hero h1 span{color:var(--cyan);}
+.hero p{color:var(--muted);font-size:15px;margin-bottom:28px;position:relative;max-width:460px;margin-left:auto;margin-right:auto;}
+.hero-btns{display:flex;gap:12px;justify-content:center;position:relative;}
+.btn-primary{
+  background:var(--cyan);color:#000;border:none;
+  padding:12px 26px;border-radius:9px;font-weight:800;
+  font-size:13px;cursor:pointer;transition:all .2s;letter-spacing:.2px;
+}
+.btn-primary:hover{background:var(--cyan2);transform:translateY(-2px);}
+.btn-ghost{
+  background:transparent;color:var(--text);
+  border:1px solid var(--border2);
+  padding:12px 26px;border-radius:9px;font-weight:600;
+  font-size:13px;cursor:pointer;transition:all .2s;
+}
+.btn-ghost:hover{border-color:var(--cyan);color:var(--cyan);}
+.stats-row{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
+  margin-top:28px;position:relative;
+}
+.stat-chip{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:12px 16px;text-align:center;}
+.stat-chip .val{font-size:20px;font-weight:800;color:#fff;font-family:'JetBrains Mono',monospace;}
+.stat-chip .lbl{font-size:10px;color:var(--muted);margin-top:2px;letter-spacing:.5px;}
+
+.section-head{display:flex;align-items:baseline;gap:10px;margin-bottom:16px;}
+.section-title{font-size:16px;font-weight:800;color:#fff;letter-spacing:-.2px;}
+.section-count{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;}
+
+.games-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;}
+.game-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:14px;padding:28px 18px;cursor:pointer;
+  transition:all .22s;text-align:center;position:relative;overflow:hidden;
+}
+.game-card::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at center,var(--cyan-glow) 0%,transparent 70%);
+  opacity:0;transition:opacity .22s;
+}
+.game-card:hover{border-color:var(--cyan);transform:translateY(-3px);}
+.game-card:hover::before{opacity:1;}
+.game-card.soon{opacity:.45;cursor:not-allowed;}
+.game-card.soon:hover{transform:none;border-color:var(--border);}
+.game-card.soon:hover::before{opacity:0;}
+.gc-icon{font-size:42px;margin-bottom:12px;position:relative;}
+.gc-name{font-size:13px;font-weight:800;letter-spacing:1px;color:#fff;position:relative;}
+.gc-multi{font-size:10px;color:var(--cyan);margin-top:3px;font-family:'JetBrains Mono',monospace;position:relative;}
+.soon-pill{
+  font-size:9px;color:var(--muted);letter-spacing:1px;
+  background:var(--border);padding:2px 7px;border-radius:4px;
+  display:inline-block;margin-top:5px;position:relative;
+}
+
+/* ── GAME SHARED ── */
+.game-wrap{max-width:860px;}
+.game-box{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:16px;padding:26px;display:flex;gap:26px;flex-wrap:wrap;
+}
+.g-controls{flex:0 0 260px;}
+.g-area{flex:1;min-width:260px;}
+
+.bal-pill{
+  background:var(--card2);border:1px solid var(--border2);
+  color:var(--cyan);padding:7px 14px;border-radius:20px;
+  font-size:12px;font-weight:700;margin-bottom:18px;
+  display:inline-block;font-family:'JetBrains Mono',monospace;
+}
+.c-lbl{color:var(--muted);font-size:10px;font-weight:700;letter-spacing:1.2px;margin-bottom:5px;text-transform:uppercase;}
+.bet-row{display:flex;gap:6px;margin-bottom:14px;align-items:center;}
+.bet-input{
+  flex:1;background:var(--card2);border:1px solid var(--border);
+  color:#fff;padding:10px 12px;border-radius:8px;font-size:14px;
+  font-weight:700;outline:none;font-family:'JetBrains Mono',monospace;
+  transition:border-color .15s;
+}
+.bet-input:focus{border-color:var(--cyan);}
+.bet-btn{
+  background:var(--border);color:var(--text);border:none;
+  padding:10px 11px;border-radius:8px;cursor:pointer;
+  font-size:11px;font-weight:700;transition:all .15s;
+}
+.bet-btn:hover{background:var(--card2);color:#fff;}
+.ctrl-select{
+  width:100%;background:var(--card2);border:1px solid var(--border);
+  color:#fff;padding:10px 12px;border-radius:8px;font-size:13px;
+  outline:none;margin-bottom:14px;cursor:pointer;font-family:'Space Grotesk',sans-serif;
+}
+.btn-place{
+  width:100%;background:var(--cyan);color:#000;border:none;
+  padding:12px;border-radius:9px;font-weight:800;font-size:13px;
+  cursor:pointer;transition:all .2s;margin-bottom:7px;letter-spacing:.2px;
+}
+.btn-place:hover{background:var(--cyan2);}
+.btn-place:disabled{background:var(--border);color:var(--muted);cursor:not-allowed;}
+.btn-cashout{
+  width:100%;background:var(--card2);color:var(--text);
+  border:1px solid var(--border);padding:12px;border-radius:9px;
+  font-weight:700;font-size:13px;cursor:pointer;transition:all .2s;
+}
+.btn-cashout:hover:not(:disabled){border-color:var(--green);color:var(--green);}
+.btn-cashout:disabled{opacity:.35;cursor:not-allowed;}
+.mult-disp{
+  color:var(--cyan);font-size:24px;font-weight:800;
+  margin-top:12px;font-family:'JetBrains Mono',monospace;
+}
+
+/* ── MINES ── */
+.mines-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+.mc{
+  aspect-ratio:1;background:var(--card2);border:1px solid var(--border);
+  border-radius:10px;cursor:pointer;transition:all .15s;
+  display:flex;align-items:center;justify-content:center;font-size:22px;
+  position:relative;overflow:hidden;
+}
+.mc:hover:not(.revealed):not(.mc-disabled){background:#1c1c35;border-color:var(--cyan);}
+.mc.gem{background:rgba(0,229,255,.12);border-color:var(--cyan);}
+.mc.bomb{background:rgba(255,23,68,.12);border-color:var(--red);}
+.mc.mc-disabled{cursor:not-allowed;}
+
+/* ── COINFLIP ── */
+.cf-area{display:flex;align-items:center;justify-content:center;flex:1;min-height:190px;}
+.coin{
+  width:150px;height:150px;border-radius:50%;
+  background:conic-gradient(from 180deg,#3333cc,#6a6aff,#3333cc);
+  border:3px solid #5555ff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:52px;
+  transition:all .3s;
+  box-shadow:0 0 0 0 rgba(80,80,255,0);
+}
+.coin.heads{
+  background:conic-gradient(from 180deg,#cc8800,#ffdd44,#cc8800);
+  border-color:#ffaa00;
+  box-shadow:0 0 30px rgba(255,200,0,.2);
+}
+.coin.spinning{animation:spin3d .15s linear infinite;}
+@keyframes spin3d{0%{transform:rotateY(0);}100%{transform:rotateY(360deg);}}
+.cf-sides{display:flex;gap:10px;margin-bottom:14px;}
+.cf-btn{
+  flex:1;padding:9px;border-radius:8px;border:2px solid var(--border);
+  background:var(--card2);color:var(--text);cursor:pointer;
+  font-weight:700;font-size:13px;transition:all .2s;
+  display:flex;align-items:center;justify-content:center;gap:7px;
+}
+.cf-btn.sel-tails{border-color:var(--cyan);color:var(--cyan);}
+.cf-btn.sel-heads{border-color:#ffaa00;color:#ffaa00;}
+.flip-result{text-align:center;font-size:16px;font-weight:700;margin-top:14px;min-height:24px;}
+.flip-result.win{color:var(--green);}
+.flip-result.lose{color:var(--red);}
+
+/* ── DICE ── */
+.dice-number{
+  font-size:80px;font-weight:800;color:#fff;
+  text-align:center;margin-bottom:18px;
+  min-height:100px;display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;
+  transition:color .3s;
+}
+.dice-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;}
+.d-stat{background:var(--card2);border:1px solid var(--border);border-radius:9px;padding:12px;text-align:center;}
+.d-stat label{display:block;font-size:9px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;}
+.d-stat span{font-size:16px;font-weight:800;color:#fff;font-family:'JetBrains Mono',monospace;}
+.dice-bar{height:10px;border-radius:6px;overflow:hidden;background:rgba(255,23,68,.25);margin-bottom:4px;position:relative;}
+.dice-bar-fill{height:100%;background:var(--green);transition:width .3s;border-radius:6px;}
+.dice-bar-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);}
+.dice-chance-txt{text-align:center;font-size:13px;color:var(--muted);margin-bottom:10px;}
+.dice-chance-txt strong{color:var(--cyan);}
+.ro-input{
+  background:var(--card2);border:1px solid var(--border);
+  color:#fff;padding:7px 10px;border-radius:7px;width:74px;
+  font-size:14px;font-weight:700;outline:none;text-align:center;
+  font-family:'JetBrains Mono',monospace;
+}
+.ro-input:focus{border-color:var(--cyan);}
+
+/* ── LEADERBOARD ── */
+.lb-tabs{display:flex;gap:0;margin-bottom:22px;border-bottom:1px solid var(--border);}
+.lb-tab{
+  padding:9px 18px;cursor:pointer;color:var(--muted);
+  font-size:12px;font-weight:700;
+  border-bottom:2px solid transparent;transition:all .2s;margin-bottom:-1px;
+  letter-spacing:.3px;
+}
+.lb-tab.active{color:var(--cyan);border-bottom-color:var(--cyan);}
+.lb-tab:hover{color:var(--text);}
+.lb-row{
+  display:flex;align-items:center;gap:12px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:11px;padding:13px 16px;margin-bottom:7px;
+  transition:all .15s;
+}
+.lb-row:hover{border-color:var(--border2);background:var(--card2);}
+.lb-rank{
+  width:30px;height:30px;border-radius:8px;
+  background:var(--card2);display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:12px;color:var(--muted);
+  flex-shrink:0;font-family:'JetBrains Mono',monospace;
+}
+.lb-rank.gold{background:rgba(255,215,0,.15);color:var(--gold);}
+.lb-rank.silver{background:rgba(192,192,192,.15);color:#c0c0c0;}
+.lb-rank.bronze{background:rgba(205,127,50,.15);color:#cd7f32;}
+.lb-ava{
+  width:36px;height:36px;border-radius:9px;
+  background:var(--card2);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:17px;flex-shrink:0;
+}
+.lb-info{flex:1;}
+.lb-name{font-weight:700;font-size:13px;color:#fff;}
+.lb-sub{font-size:10px;color:var(--muted);}
+.lb-val{font-weight:800;font-size:14px;color:var(--cyan);font-family:'JetBrains Mono',monospace;}
+
+/* ── LOGIN MODAL ── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.82);
+  z-index:500;display:flex;align-items:center;justify-content:center;
+  backdrop-filter:blur(6px);
+  opacity:0;pointer-events:none;transition:opacity .2s;
+}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{
+  background:var(--card);border:1px solid var(--border2);
+  border-radius:18px;padding:30px;width:420px;max-width:92vw;
+  position:relative;transform:scale(.96) translateY(8px);
+  transition:transform .2s;
+}
+.modal-overlay.open .modal{transform:scale(1) translateY(0);}
+.modal-logo{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--cyan),var(--purple));display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:16px;}
+.modal h2{font-size:20px;font-weight:800;margin-bottom:4px;letter-spacing:-.3px;}
+.modal .modal-desc{color:var(--muted);font-size:12px;margin-bottom:22px;}
+.modal-close{
+  position:absolute;top:14px;right:14px;
+  background:var(--card2);border:1px solid var(--border);
+  color:var(--muted);font-size:14px;cursor:pointer;
+  width:28px;height:28px;border-radius:7px;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s;
+}
+.modal-close:hover{background:var(--border);color:#fff;}
+.fg{margin-bottom:14px;}
+.fg label{display:block;font-size:10px;font-weight:700;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px;}
+.fi{
+  width:100%;background:var(--card2);border:1px solid var(--border);
+  color:#fff;padding:11px 14px;border-radius:9px;font-size:14px;
+  outline:none;transition:border-color .15s;font-family:'Space Grotesk',sans-serif;
+}
+.fi:focus{border-color:var(--cyan);}
+.form-footer{display:flex;justify-content:flex-end;margin-top:8px;}
+.btn-verify{
+  background:linear-gradient(135deg,var(--cyan),var(--purple));
+  color:#000;border:none;padding:11px 26px;border-radius:9px;
+  font-weight:800;font-size:13px;cursor:pointer;transition:all .2s;
+}
+.btn-verify:hover{opacity:.9;transform:translateY(-1px);}
+.modal-err{color:var(--red);font-size:11px;margin-top:7px;min-height:16px;}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:22px;right:22px;z-index:999;
+  background:var(--card2);border:1px solid var(--border2);
+  border-radius:11px;padding:11px 18px;
+  font-size:12px;font-weight:700;color:#fff;
+  transform:translateY(70px);opacity:0;
+  transition:all .3s cubic-bezier(.34,1.56,.64,1);
+  pointer-events:none;
+}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.win{border-color:var(--green);color:var(--green);}
+.toast.lose{border-color:var(--red);color:var(--red);}
+
+/* ── HISTORY ── */
+.history-list{margin-top:14px;}
+.h-item{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 14px;border-radius:8px;
+  background:var(--card2);border:1px solid var(--border);
+  margin-bottom:6px;font-size:12px;
+}
+.h-game{color:var(--muted);flex:1;}
+.h-bet{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);}
+.h-result{font-weight:800;font-family:'JetBrains Mono',monospace;font-size:12px;}
+.h-result.win{color:var(--green);}
+.h-result.lose{color:var(--red);}
+</style>
+</head>
+<body>
+
+<div id="stars"></div>
+
+<div id="app">
+  <!-- NAVBAR -->
+  <nav>
+    <a class="nav-logo" onclick="navigate('home')">
+      <div class="logo-box">🐓</div>
+      <span class="nav-logo-text">ChikinSMP</span>
+    </a>
+    <div class="nav-right">
+      <div class="nav-bal" id="nav-bal">$0</div>
+      <div class="user-chip" id="user-chip"><span class="ava">🐓</span><span id="chip-name"></span></div>
+      <button class="btn-nav-logout" id="btn-logout" onclick="logout()">Log Out</button>
+      <button class="btn-nav-login" id="btn-login-nav" onclick="openLogin()">Log In</button>
+    </div>
+  </nav>
+
+  <div class="layout">
+    <!-- SIDEBAR -->
+    <aside>
+      <div>
+        <div class="s-section">
+          <div class="s-label">Games</div>
+          <div class="s-item active" id="nav-home" onclick="navigate('home')">
+            <span class="ico">🏠</span>Home
+          </div>
+          <div class="s-item" id="nav-mines" onclick="navigate('mines')">
+            <span class="ico">💣</span>Mines
+          </div>
+          <div class="s-item" id="nav-coinflip" onclick="navigate('coinflip')">
+            <span class="ico">🪙</span>Coinflip
+          </div>
+          <div class="s-item" id="nav-dice" onclick="navigate('dice')">
+            <span class="ico">🎲</span>Dice
+          </div>
+          <div class="s-item" style="opacity:.4;cursor:not-allowed;">
+            <span class="ico">🎰</span>Slots<span class="s-soon">SOON</span>
+          </div>
+        </div>
+        <div class="s-section">
+          <div class="s-label">Community</div>
+          <div class="s-item" id="nav-leaderboard" onclick="navigate('leaderboard')">
+            <span class="ico">🏆</span>Leaderboard
+          </div>
+          <div class="s-item" id="nav-history" onclick="navigate('history')">
+            <span class="ico">📋</span>History
+          </div>
+          <div class="s-item" onclick="window.open('https://discord.gg/Dqmf4v3v36','_blank')">
+            <span class="ico">🎮</span>Discord
+          </div>
+        </div>
+      </div>
+      <div class="s-bottom">
+        <button class="s-login-btn" id="s-login-btn" onclick="openLogin()">🐓 Log In</button>
+      </div>
+    </aside>
+
+    <!-- PAGES -->
+    <main>
+
+      <!-- HOME -->
+      <div class="page active" id="page-home">
+        <div class="hero">
+          <div class="hero-badge">🐓 ChikinSMP Casino</div>
+          <h1>Win Big.<br><span>Play Fair.</span></h1>
+          <p>Mines, Coinflip & Dice — provably fair odds, instant rounds. Start winning in seconds.</p>
+          <div class="hero-btns">
+            <button class="btn-primary" onclick="openLogin()">Get Started →</button>
+            <button class="btn-ghost" onclick="openLogin()">Already have account</button>
+          </div>
+          <div class="stats-row">
+            <div class="stat-chip"><div class="val">$1,000</div><div class="lbl">Starting Balance</div></div>
+            <div class="stat-chip"><div class="val">3</div><div class="lbl">Games Available</div></div>
+            <div class="stat-chip"><div class="val">97%</div><div class="lbl">Return Rate</div></div>
+          </div>
+        </div>
+        <div class="section-head">
+          <div class="section-title">Games</div>
+          <div class="section-count">4 games</div>
+        </div>
+        <div class="games-grid">
+          <div class="game-card" onclick="navigate('mines')">
+            <div class="gc-icon">💣</div>
+            <div class="gc-name">MINES</div>
+            <div class="gc-multi">up to 24x</div>
+          </div>
+          <div class="game-card" onclick="navigate('coinflip')">
+            <div class="gc-icon">🪙</div>
+            <div class="gc-name">COINFLIP</div>
+            <div class="gc-multi">2x payout</div>
+          </div>
+          <div class="game-card" onclick="navigate('dice')">
+            <div class="gc-icon">🎲</div>
+            <div class="gc-name">DICE</div>
+            <div class="gc-multi">up to 99x</div>
+          </div>
+          <div class="game-card soon">
+            <div class="gc-icon">🎰</div>
+            <div class="gc-name">SLOTS</div>
+            <div class="soon-pill">SOON</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MINES -->
+      <div class="page" id="page-mines">
+        <div class="pg-title">💣 Mines</div>
+        <div class="pg-sub">Avoid bombs, collect gems. Cash out before you explode!</div>
+        <div class="game-box game-wrap">
+          <div class="g-controls">
+            <div class="bal-pill" id="mines-bal">$0.00</div>
+            <div class="c-lbl">Bet Amount</div>
+            <div class="bet-row">
+              <input class="bet-input" id="mines-bet" type="number" value="100" min="1">
+              <button class="bet-btn" onclick="halveBet('mines-bet')">½</button>
+              <button class="bet-btn" onclick="doubleBet('mines-bet')">2x</button>
+            </div>
+            <div class="c-lbl">Mines Count</div>
+            <select class="ctrl-select" id="mines-count">
+              <option value="1">1 Mine</option>
+              <option value="2">2 Mines</option>
+              <option value="3" selected>3 Mines</option>
+              <option value="5">5 Mines</option>
+              <option value="10">10 Mines</option>
+              <option value="15">15 Mines</option>
+            </select>
+            <button class="btn-place" id="mines-place-btn" onclick="startMines()">Place Bet</button>
+            <button class="btn-cashout" id="mines-cashout-btn" disabled onclick="minesCashout()">Cash Out</button>
+            <div class="mult-disp" id="mines-mult">×1.00</div>
+          </div>
+          <div class="g-area">
+            <div class="mines-grid" id="mines-grid"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COINFLIP -->
+      <div class="page" id="page-coinflip">
+        <div class="pg-title">🪙 Coinflip</div>
+        <div class="pg-sub">Pick a side, flip the coin. 50/50 to double your balance!</div>
+        <div class="game-box game-wrap" style="align-items:center;">
+          <div class="g-controls">
+            <div class="c-lbl">Bet Amount <span style="color:var(--cyan);float:right;font-family:'JetBrains Mono',monospace;" id="cf-bal">$0</span></div>
+            <input class="bet-input" id="cf-bet" type="number" value="100" min="1" style="width:100%;margin-bottom:14px;">
+            <div class="c-lbl">Pick Side</div>
+            <div class="cf-sides">
+              <button class="cf-btn sel-heads" id="heads-btn" onclick="selectSide('heads')">🟡 Heads</button>
+              <button class="cf-btn" id="tails-btn" onclick="selectSide('tails')">🔵 Tails</button>
+            </div>
+            <button class="btn-place" id="cf-btn-flip" onclick="flipCoin()">Flip Coin</button>
+            <div class="flip-result" id="flip-result"></div>
+          </div>
+          <div class="cf-area">
+            <div class="coin heads" id="the-coin">🟡</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DICE -->
+      <div class="page" id="page-dice">
+        <div class="pg-title">🎲 Dice</div>
+        <div class="pg-sub">Roll over the target. Adjust risk and reward freely.</div>
+        <div class="game-box game-wrap" style="flex-direction:column;">
+          <div style="display:flex;gap:24px;flex-wrap:wrap;">
+            <div class="g-controls" style="flex:0 0 240px;">
+              <div class="c-lbl">Bet <span style="color:var(--cyan);float:right;font-family:'JetBrains Mono',monospace;" id="dice-bal">$0.00</span></div>
+              <div class="bet-row">
+                <input class="bet-input" id="dice-bet" type="number" value="100" min="1">
+                <button class="bet-btn" onclick="halveBet('dice-bet')">½</button>
+                <button class="bet-btn" onclick="doubleBet('dice-bet')">2x</button>
+              </div>
+              <button class="btn-place" id="dice-btn" onclick="rollDice()">Roll Dice</button>
+            </div>
+            <div class="g-area">
+              <div class="dice-number" id="dice-result">—</div>
+            </div>
+          </div>
+          <div>
+            <div class="dice-stats">
+              <div class="d-stat">
+                <label>Multiplier</label>
+                <span id="dice-mult">2.0000</span>
+              </div>
+              <div class="d-stat">
+                <label>Roll Over</label>
+                <input class="ro-input" id="dice-ro" type="number" value="50" min="2" max="98" oninput="updateDiceStats()">
+              </div>
+              <div class="d-stat">
+                <label>Win Chance</label>
+                <span id="dice-wc">50%</span>
+              </div>
+            </div>
+            <div class="dice-chance-txt"><span id="d-lbl-pct">50</span>% Win Chance · <strong id="d-lbl-mult">2.0000X</strong></div>
+            <div class="dice-bar"><div class="dice-bar-fill" id="dice-bar-fill" style="width:50%"></div></div>
+            <div class="dice-bar-labels"><span>0</span><span>25</span><span>50</span><span>75</span><span>99</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LEADERBOARD -->
+      <div class="page" id="page-leaderboard">
+        <div class="pg-title" style="text-align:center;">🏆 Leaderboard</div>
+        <div class="pg-sub" style="text-align:center;">Top players on ChikinSMP</div>
+        <div class="lb-tabs">
+          <div class="lb-tab active" onclick="switchLbTab('wagered',this)">Top Wagered</div>
+          <div class="lb-tab" onclick="switchLbTab('richest',this)">Richest</div>
+          <div class="lb-tab" onclick="switchLbTab('depositors',this)">Top Depositors</div>
+        </div>
+        <div id="lb-content"></div>
+      </div>
+
+      <!-- HISTORY -->
+      <div class="page" id="page-history">
+        <div class="pg-title">📋 Bet History</div>
+        <div class="pg-sub">Your recent game results</div>
+        <div id="history-content">
+          <div style="text-align:center;color:var(--muted);padding:40px 0;font-size:14px;">No bets yet. Start playing!</div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- LOGIN MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeLoginOutside(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeLogin()">✕</button>
+    <div class="modal-logo">🐓</div>
+    <h2>Welcome Back</h2>
+    <div class="modal-desc">Enter your Minecraft username to log in to ChikinSMP.</div>
+    <div class="fg">
+      <label>Minecraft Username (IGN)</label>
+      <input class="fi" id="login-ign" type="text" placeholder="e.g. Steve or .BedrockPlayer">
+    </div>
+    <div class="fg">
+      <label>Password</label>
+      <input class="fi" id="login-pass" type="password" placeholder="Enter your password...">
+    </div>
+    <div class="modal-err" id="modal-err"></div>
+    <div class="form-footer">
+      <button class="btn-verify" onclick="doLogin()">Log In →</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STARS ────────────────────────────────────
+(function(){
+  const c=document.getElementById('stars');
+  for(let i=0;i<130;i++){
+    const s=document.createElement('div');
+    s.className='star';
+    const sz=Math.random()<0.7?1:2;
+    s.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*100}%;width:${sz}px;height:${sz}px;--d:${2+Math.random()*5}s;--delay:${Math.random()*6}s;--op:${.2+Math.random()*.6}`;
+    c.appendChild(s);
+  }
+})();
+
+// ── STATE ────────────────────────────────────
+let currentUser=null;
+let balance=1000;
+let betHistory=[];
+
+// ── UI ───────────────────────────────────────
+function updateUI(){
+  const li=!!currentUser;
+  document.getElementById('btn-login-nav').style.display=li?'none':'block';
+  document.getElementById('btn-logout').style.display=li?'block':'none';
+  document.getElementById('nav-bal').style.display=li?'block':'none';
+  document.getElementById('user-chip').style.display=li?'flex':'none';
+  document.getElementById('s-login-btn').style.display=li?'none':'block';
+  if(li){
+    const b='$'+balance.toLocaleString();
+    document.getElementById('nav-bal').textContent=b;
+    document.getElementById('chip-name').textContent=currentUser;
+    document.getElementById('mines-bal').textContent='$'+balance.toFixed(2);
+    document.getElementById('cf-bal').textContent='$'+balance.toLocaleString();
+    document.getElementById('dice-bal').textContent='$'+balance.toFixed(2);
+  }
+}
+
+// ── NAVIGATE ─────────────────────────────────
+function navigate(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.s-item').forEach(i=>i.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  const ni=document.getElementById('nav-'+page);
+  if(ni)ni.classList.add('active');
+  if(page==='mines')initMinesGrid();
+  if(page==='leaderboard')renderLeaderboard('wagered');
+  if(page==='history')renderHistory();
+  updateUI();
+}
+
+// ── LOGIN ────────────────────────────────────
+function openLogin(){document.getElementById('modal-overlay').classList.add('open');}
+function closeLogin(){
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.getElementById('modal-err').textContent='';
+}
+function closeLoginOutside(e){if(e.target===document.getElementById('modal-overlay'))closeLogin();}
+function doLogin(){
+  const ign=document.getElementById('login-ign').value.trim();
+  const pass=document.getElementById('login-pass').value;
+  if(!ign){document.getElementById('modal-err').textContent='Please enter your IGN.';return;}
+  if(!pass){document.getElementById('modal-err').textContent='Please enter your password.';return;}
+  currentUser=ign;
+  balance=1000;
+  closeLogin();
+  updateUI();
+  showToast('Welcome, '+ign+'! 🐓');
+}
+function logout(){
+  currentUser=null;
+  updateUI();
+  navigate('home');
+  showToast('Logged out.');
+}
+
+// ── TOAST ────────────────────────────────────
+function showToast(msg,type){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className='toast'+(type?' '+type:'');
+  setTimeout(()=>t.classList.add('show'),10);
+  setTimeout(()=>t.classList.remove('show'),3200);
+}
+
+// ── BET HELPERS ──────────────────────────────
+function halveBet(id){const i=document.getElementById(id);i.value=Math.max(1,Math.floor(+i.value/2));}
+function doubleBet(id){const i=document.getElementById(id);i.value=Math.floor(+i.value*2);}
+
+// ── HISTORY ──────────────────────────────────
+function addHistory(game,bet,result,profit){
+  betHistory.unshift({game,bet,result,profit,time:new Date().toLocaleTimeString()});
+  if(betHistory.length>50)betHistory.pop();
+}
+function renderHistory(){
+  const el=document.getElementById('history-content');
+  if(!betHistory.length){
+    el.innerHTML='<div style="text-align:center;color:var(--muted);padding:40px 0;font-size:14px;">No bets yet. Start playing!</div>';
+    return;
+  }
+  el.innerHTML='<div class="history-list">'+betHistory.map(h=>`
+    <div class="h-item">
+      <span class="h-game">${h.game} · ${h.time}</span>
+      <span class="h-bet">$${h.bet}</span>
+      <span class="h-result ${h.profit>0?'win':'lose'}">${h.profit>0?'+$'+h.profit:'−$'+Math.abs(h.profit)}</span>
+    </div>`).join('')+'</div>';
+}
+
+// ── MINES ────────────────────────────────────
+let minesActive=false,minesCells=[],minesRevealed=0,minesBombs=[],minesBet=0,minesMultiplier=1;
+
+function initMinesGrid(){
+  const grid=document.getElementById('mines-grid');
+  grid.innerHTML='';minesCells=[];
+  for(let i=0;i<25;i++){
+    const cell=document.createElement('div');
+    cell.className='mc';
+    cell.dataset.index=i;
+    cell.onclick=()=>revealCell(i);
+    grid.appendChild(cell);
+    minesCells.push(cell);
+  }
+}
+
+function startMines(){
+  if(!currentUser){openLogin();return;}
+  minesBet=parseInt(document.getElementById('mines-bet').value)||100;
+  if(minesBet<1){showToast('Minimum bet is $1!','lose');return;}
+  if(minesBet>balance){showToast('Insufficient balance!','lose');return;}
+  const cnt=parseInt(document.getElementById('mines-count').value);
+  balance-=minesBet;updateUI();
+  minesBombs=[];
+  while(minesBombs.length<cnt){const r=Math.floor(Math.random()*25);if(!minesBombs.includes(r))minesBombs.push(r);}
+  minesRevealed=0;minesMultiplier=1;minesActive=true;
+  document.getElementById('mines-place-btn').disabled=true;
+  document.getElementById('mines-cashout-btn').disabled=false;
+  document.getElementById('mines-mult').textContent='×1.00';
+  minesCells.forEach(c=>{c.className='mc';c.textContent='';});
+}
+
+function revealCell(idx){
+  if(!minesActive)return;
+  const cell=minesCells[idx];
+  if(cell.classList.contains('gem')||cell.classList.contains('bomb'))return;
+  if(minesBombs.includes(idx)){
+    cell.className='mc bomb';cell.textContent='💣';
+    minesBombs.forEach(b=>{minesCells[b].className='mc bomb';minesCells[b].textContent='💣';});
+    minesActive=false;
+    document.getElementById('mines-place-btn').disabled=false;
+    document.getElementById('mines-cashout-btn').disabled=true;
+    addHistory('💣 Mines',minesBet,'lose',-minesBet);
+    showToast('💥 Boom! You hit a mine!','lose');
+  } else {
+    cell.className='mc gem';cell.textContent='💎';
+    minesRevealed++;
+    const safe=25-minesBombs.length;
+    minesMultiplier=Math.pow(safe/(safe-minesRevealed+1),minesRevealed)*0.97;
+    if(minesMultiplier<1)minesMultiplier=1;
+    document.getElementById('mines-mult').textContent='×'+minesMultiplier.toFixed(2);
+  }
+}
+
+function minesCashout(){
+  if(!minesActive||minesRevealed===0)return;
+  const win=Math.floor(minesBet*minesMultiplier);
+  balance+=win;updateUI();
+  minesActive=false;
+  document.getElementById('mines-place-btn').disabled=false;
+  document.getElementById('mines-cashout-btn').disabled=true;
+  addHistory('💣 Mines',minesBet,'win',win-minesBet);
+  showToast('💰 Cashed out $'+win+'!','win');
+}
+
+// ── COINFLIP ─────────────────────────────────
+let selectedSide='heads';
+
+function selectSide(side){
+  selectedSide=side;
+  document.getElementById('heads-btn').className='cf-btn'+(side==='heads'?' sel-heads':'');
+  document.getElementById('tails-btn').className='cf-btn'+(side==='tails'?' sel-tails':'');
+  const coin=document.getElementById('the-coin');
+  if(side==='heads'){coin.className='coin heads';coin.textContent='🟡';}
+  else{coin.className='coin';coin.textContent='🔵';}
+}
+
+function flipCoin(){
+  if(!currentUser){openLogin();return;}
+  const bet=parseInt(document.getElementById('cf-bet').value)||100;
+  if(bet<1){showToast('Minimum bet is $1!','lose');return;}
+  if(bet>balance){showToast('Insufficient balance!','lose');return;}
+  balance-=bet;updateUI();
+  const btn=document.getElementById('cf-btn-flip');
+  btn.disabled=true;
+  const coin=document.getElementById('the-coin');
+  const result=Math.random()<0.5?'heads':'tails';
+  coin.classList.add('spinning');
+  let frames=0;
+  const iv=setInterval(()=>{
+    frames++;
+    if(frames>=14){
+      clearInterval(iv);
+      coin.classList.remove('spinning');
+      if(result==='heads'){coin.className='coin heads';coin.textContent='🟡';}
+      else{coin.className='coin';coin.textContent='🔵';}
+      const res=document.getElementById('flip-result');
+      if(result===selectedSide){
+        const w=bet*2;balance+=w;updateUI();
+        res.className='flip-result win';res.textContent='✅ You won $'+w+'!';
+        addHistory('🪙 Coinflip',bet,'win',w-bet);
+        showToast('🎉 You won $'+w+'!','win');
+      } else {
+        res.className='flip-result lose';res.textContent='❌ You lost $'+bet+'!';
+        addHistory('🪙 Coinflip',bet,'lose',-bet);
+        showToast('😞 You lost!','lose');
+      }
+      btn.disabled=false;
+    }
+  },80);
+}
+
+// ── DICE ─────────────────────────────────────
+function updateDiceStats(){
+  const ro=parseInt(document.getElementById('dice-ro').value)||50;
+  const wc=99-ro;
+  const mult=wc>0?(99/wc*0.97):999;
+  document.getElementById('dice-mult').textContent=mult.toFixed(4);
+  document.getElementById('dice-wc').textContent=wc+'%';
+  document.getElementById('d-lbl-pct').textContent=wc;
+  document.getElementById('d-lbl-mult').textContent=mult.toFixed(4)+'X';
+  document.getElementById('dice-bar-fill').style.width=wc+'%';
+}
+
+function rollDice(){
+  if(!currentUser){openLogin();return;}
+  const bet=parseInt(document.getElementById('dice-bet').value)||100;
+  if(bet<1){showToast('Minimum bet is $1!','lose');return;}
+  if(bet>balance){showToast('Insufficient balance!','lose');return;}
+  balance-=bet;updateUI();
+  const ro=parseInt(document.getElementById('dice-ro').value)||50;
+  const wc=99-ro;
+  const mult=wc>0?(99/wc*0.97):999;
+  const roll=Math.floor(Math.random()*100);
+  const el=document.getElementById('dice-result');
+  const btn=document.getElementById('dice-btn');
+  btn.disabled=true;
+  el.style.color='#fff';
+  let frames=0;
+  const iv=setInterval(()=>{
+    el.textContent=Math.floor(Math.random()*100);
+    frames++;
+    if(frames>=16){
+      clearInterval(iv);
+      el.textContent=roll;
+      const win=roll>ro;
+      if(win){
+        const w=Math.floor(bet*mult);balance+=w;updateUI();
+        el.style.color='var(--green)';
+        addHistory('🎲 Dice',bet,'win',w-bet);
+        showToast('🎲 Rolled '+roll+'! Won $'+w+'!','win');
+      } else {
+        el.style.color='var(--red)';
+        addHistory('🎲 Dice',bet,'lose',-bet);
+        showToast('🎲 Rolled '+roll+'! Lost!','lose');
+      }
+      setTimeout(()=>{el.style.color='#fff';},2500);
+      btn.disabled=false;
+    }
+  },60);
+}
+
+// ── LEADERBOARD ──────────────────────────────
+const demoLB=[
+  ['Steve',{balance:24200,wagered:185000,deposited:30000}],
+  ['Notch',{balance:18300,wagered:142000,deposited:25000}],
+  ['Alex',{balance:11600,wagered:98000,deposited:18000}],
+  ['Herobrine',{balance:8400,wagered:76000,deposited:14000}],
+  ['CreeperKing',{balance:5200,wagered:54000,deposited:10000}],
+  ['DiamondMiner',{balance:3800,wagered:41000,deposited:8000}],
+  ['EndermanSlayer',{balance:2700,wagered:32000,deposited:6000}],
+];
+
+function renderLeaderboard(tab){
+  const sorted=[...demoLB];
+  if(tab==='wagered')sorted.sort((a,b)=>b[1].wagered-a[1].wagered);
+  else if(tab==='richest')sorted.sort((a,b)=>b[1].balance-a[1].balance);
+  else sorted.sort((a,b)=>b[1].deposited-a[1].deposited);
+  const medals=['gold','silver','bronze'];
+  const avas=['🐓','⚔️','🏹','👻','💚','💎','🌀'];
+  document.getElementById('lb-content').innerHTML=sorted.slice(0,10).map((u,i)=>{
+    const val=tab==='wagered'?u[1].wagered:tab==='richest'?u[1].balance:u[1].deposited;
+    return `<div class="lb-row">
+      <div class="lb-rank ${medals[i]||''}">${i+1}</div>
+      <div class="lb-ava">${avas[i]||'?'}</div>
+      <div class="lb-info"><div class="lb-name">${u[0]}</div><div class="lb-sub">${tab==='wagered'?'Total wagered':tab==='richest'?'Current balance':'Total deposited'}</div></div>
+      <div class="lb-val">$${val.toLocaleString()}</div>
+    </div>`;
+  }).join('');
+}
+
+function switchLbTab(tab,el){
+  document.querySelectorAll('.lb-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderLeaderboard(tab);
+}
+
+// ── INIT ─────────────────────────────────────
+initMinesGrid();
+updateDiceStats();
+updateUI();
+</script>
+</body>
+</html>
